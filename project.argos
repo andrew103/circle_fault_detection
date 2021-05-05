@@ -109,8 +109,11 @@
       These empty loop functions are just needed to trick ARGoS into loading
       the new khepera proximity sensor. You can use your own loop functions here.
   -->
-  <loop_functions library="build/libproximity-lf"
+  <loop_functions library="build/proximity_modified/libproximity-lf"
                   label="proximity-lf" />
+
+  <loop_functions library="build/loop_functions/project_loop_function/libproject_loop_functions"
+                  label="loop_functions" />
 
   <!-- *********************** -->
   <!-- * Arena configuration * -->

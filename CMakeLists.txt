@@ -1,7 +1,3 @@
-cmake_minimum_required(VERSION 3.8.0)
-project(proximity-lf)
-
-# Compile in Release by default
 if(CMAKE_BUILD_TYPE STREQUAL "")
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel ..." FORCE)
 endif(CMAKE_BUILD_TYPE STREQUAL "")
@@ -21,17 +17,20 @@ link_libraries(${ARGOS_LDFLAGS})
 find_package(Buzz REQUIRED)
 include_directories(${BUZZ_C_INCLUDE_DIR})
 
-# Compile code
-add_library(proximity-lf SHARED
-  proximity-lf.h proximity-lf.cpp
-  kheperaiv_proximity_group6_sensor.h kheperaiv_proximity_group6_sensor.cpp)
-target_link_libraries(proximity-lf
-  ${BUZZ_LIBRARY}
-  argos3core_simulator
-  argos3plugin_simulator_dynamics2d
-  argos3plugin_simulator_entities
-  argos3plugin_simulator_kheperaiv
-  argos3plugin_simulator_genericrobot
-  argos3plugin_simulator_media
-  argos3plugin_simulator_qtopengl
-  argos3plugin_simulator_buzz)
+
+# Descend into the homswarm_loop_functions directory
+add_subdirectory(loop_functions)
+add_subdirectory(proximity_modified)
+
+# Descend into the foraging_loop_functions directory
+# add_subdirectory(foraging_loop_functions)
+
+# Descend into the homswarm_loop_functions directory
+# add_subdirectory(homswarm_loop_functions)
+
+# If Qt+OpenGL dependencies were found, descend into these directories
+# if(ARGOS_COMPILE_QTOPENGL)
+#  add_subdirectory(trajectory_loop_functions)
+#  add_subdirectory(id_loop_functions)
+# endif(ARGOS_COMPILE_QTOPENGL)
+
