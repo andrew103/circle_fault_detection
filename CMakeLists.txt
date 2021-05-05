@@ -1,48 +1,37 @@
-cmake_minimum_required(VERSION 2.8.12)
-project(faultdetection-epuckswarm)
+cmake_minimum_required(VERSION 3.8.0)
+project(proximity-lf)
 
-if(APPLE)
-  # Add address sanitizer support for CLang
-  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address -fno-optimize-sibling-calls -fno-omit-frame-pointer")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -fno-optimize-sibling-calls -fno-omit-frame-pointer")
-  set(CMAKE_MODULE_LINKER_FLAGS_DEBUG "${CMAKE_MODULE_LINKER_FLAGS_DEBUG} -fsanitize=address")
-  set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_MODULE_LINKER_FLAGS_DEBUG} -fsanitize=address")
-  set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_MODULE_LINKER_FLAGS_DEBUG} -fsanitize=address")
-endif(APPLE)
+# Compile in Release by default
+if(CMAKE_BUILD_TYPE STREQUAL "")
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel ..." FORCE)
+endif(CMAKE_BUILD_TYPE STREQUAL "")
 
-# Deactivate RPATH for MacOSX
-set(CMAKE_MACOSX_RPATH 0)
-
-# Set the path where CMake will find additional scripts
-set(CMAKE_MODULE_PATH $ENV{CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
-message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+# Use C++17
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Find the ARGoS package, make sure to save the ARGoS prefix
-find_package(PkgConfig)
-pkg_check_modules(ARGOS REQUIRED argos3_simulator)
-set(ARGOS_PREFIX ${ARGOS_PREFIX} CACHE INTERNAL "")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ARGOS_PREFIX}/share/argos3/cmake)
+find_package(ARGoS REQUIRED)
+include_directories(${CMAKE_SOURCE_DIR} ${ARGOS_INCLUDE_DIRS})
+link_directories(${ARGOS_LIBRARY_DIR})
+link_libraries(${ARGOS_LDFLAGS})
 
-# Check whether all the necessary libs have been installed to compile the
-# code that depends on Qt and OpenGL
-include(ARGoSCheckQTOpenGL)
+# Check for Buzz
+find_package(Buzz REQUIRED)
+include_directories(${BUZZ_C_INCLUDE_DIR})
 
-# Find Lua
-find_package(Lua52 REQUIRED)
-
-# Find the GSL package
-find_package(GSL REQUIRED)
-
-# Set ARGoS include dir
-include_directories(${CMAKE_SOURCE_DIR} ${ARGOS_INCLUDE_DIRS} ${GSL_INCLUDE_DIR} ${LUA_INCLUDE_DIR})
-
-# You need to replace the libargos3plugin_simulator_epuck.so of argos simulator with the library of the same name of the argos-epuck plugin
-  
-# Set ARGoS link dir
-link_directories(${ARGOS_LIBRARY_DIRS}) 
-
-# Descend into the controllers directory
-add_subdirectory(controllers)
-
-# Descend into the loop_functions directory
-add_subdirectory(loop_functions)
+# Compile code
+add_library(proximity-lf SHARED
+  proximity-lf.h proximity-lf.cpp
+  kheperaiv_proximity_group6_sensor.h kheperaiv_proximity_group6_sensor.cpp)
+target_link_libraries(proximity-lf
+  ${BUZZ_LIBRARY}
+  argos3core_simulator
+  argos3plugin_simulator_dynamics2d
+  argos3plugin_simulator_entities
+  argos3plugin_simulator_kheperaiv
+  argos3plugin_simulator_genericrobot
+  argos3plugin_simulator_media
+  argos3plugin_simulator_qtopengl
+  argos3plugin_simulator_buzz)
