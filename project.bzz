@@ -34,6 +34,7 @@ function init() {
 	reset()
 }
 
+# 600 steps till circle created with 10 tics/s
 function step() {
 	if (proximity[0].value > 0.0){
 		S = 1
@@ -41,15 +42,32 @@ function step() {
 	else {
 		S = 0
 	}
+	
+	if ((id == 2) and (step_counter > 600)){
+		set_leds(255,0,0)
+		set_wheels(10.0, 10.0)
+	}
+	else {
+		if (S == 1) {
+			#set_leds(0,0,255)
+			set_wheels(3.0,9.0)
+		}
+		else {
+			#set_leds(0, 255, 0)
+			set_wheels(9.0,1.0)
+		}
+	}
 
-	if (S == 1)
-		set_wheels(3.0,9.0)
-	else
-		set_wheels(9.0,1.0)
+	step_counter = step_counter + 1
 }
 
 function reset() {
 	S = 0
+	step_counter = 0
+
+	if (id == 2) {
+		set_leds(0,255,0)
+	}
 }
 
 function destroy() {
