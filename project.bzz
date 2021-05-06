@@ -36,6 +36,23 @@ function init() {
 
 # 600 steps till circle created with 10 tics/s
 function step() {
+	step_movement()
+
+	close_neighbors = {}
+
+	neighbors.foreach(
+		function(rid, data) {
+			if ((data.azimuth > -azim_range*((math.pi)/180)) and (data.azimuth < azim_range*((math.pi)/180)) and (data.distance < dist_range))
+				close_neighbors[rid] = data
+			else if ((data.azimuth < (-180 + azim_range)*((math.pi)/180)) and (data.azimuth > (180 - azim_range)*((math.pi)/180)) and (data.distance < dist_range))
+				close_neighbors[rid] = data
+		}
+	)
+
+	log(id, ": ",close_neighbors)
+}
+
+function step_movement() {
 	if (proximity[0].value > 0.0){
 		S = 1
 	}
@@ -44,8 +61,7 @@ function step() {
 	}
 	
 	if ((id == 2) and (step_counter > 600)){
-		set_leds(255,0,0)
-		set_wheels(10.0, 10.0)
+		set_wheels(3.0, 9.0)
 	}
 	else {
 		if (S == 1) {
@@ -59,15 +75,27 @@ function step() {
 	}
 
 	step_counter = step_counter + 1
+
+	if ((proximity[0].value > 0.0) and (proximity[4].value > 0.0)){
+		set_leds(0, 255, 0)
+	} else if ((proximity[0].value > 0.0) or (proximity[4].value > 0.0)){
+		set_leds(0, 0, 255)
+	} else{
+		set_leds(255, 0, 0)
+	}
 }
 
 function reset() {
+	math.rng.setseed(id)
 	S = 0
 	step_counter = 0
 
-	if (id == 2) {
-		set_leds(0,255,0)
-	}
+	azim_range = 10
+	dist_range = 40
+
+#	if (id == 2) {
+#		set_leds(0,255,0)
+#	}
 }
 
 function destroy() {

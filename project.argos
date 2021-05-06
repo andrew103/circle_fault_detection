@@ -136,7 +136,7 @@
   <arena size="5, 5, 1" center="0,0,0.5">
 
     <!-- Place four boxes in a square to delimit the arena -->
-    <box id="wall_north" size="4,0.1,0.5" movable="false">
+    <!-- <box id="wall_north" size="4,0.1,0.5" movable="false">
       <body position="0,2,0" orientation="0,0,0" />
     </box>
     <box id="wall_south" size="4,0.1,0.5" movable="false">
@@ -147,7 +147,7 @@
     </box>
     <box id="wall_west" size="0.1,4,0.5" movable="false">
       <body position="-2,0,0" orientation="0,0,0" />
-    </box>
+    </box> -->
 
     <!--
         You can distribute entities randomly. Here, we distribute
