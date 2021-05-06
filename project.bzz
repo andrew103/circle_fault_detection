@@ -42,10 +42,21 @@ function step() {
 
 	neighbors.foreach(
 		function(rid, data) {
-			if ((data.azimuth > -azim_range*((math.pi)/180)) and (data.azimuth < azim_range*((math.pi)/180)) and (data.distance < dist_range))
-				close_neighbors[rid] = data
-			else if ((data.azimuth < ((-180 + azim_range)*((math.pi)/180)) or (data.azimuth > (180 - azim_range)*((math.pi)/180))) and (data.distance < dist_range)) {
-				close_neighbors[rid] = data
+			if ((data.azimuth > -azim_range*((math.pi)/180)) and (data.azimuth < azim_range*((math.pi)/180)) and (data.distance < min_front_range)){
+				#min_front_range = data.distance
+				neighbor = {
+					.data=data,
+					.rid=rid
+				}
+				close_neighbors["front"] = neighbor
+			}
+			else if ((data.azimuth < ((-180 + azim_range)*((math.pi)/180)) or (data.azimuth > (180 - azim_range)*((math.pi)/180))) and (data.distance < min_rear_range)) {
+				#min_rear_range = data.distance
+				neighbor = {
+					.data=data,
+					.rid=rid
+				}
+				close_neighbors["rear"] = neighbor
 			}
 		}
 	)
@@ -93,6 +104,9 @@ function reset() {
 
 	azim_range = 30
 	dist_range = 40
+
+	min_front_range = dist_range
+	min_rear_range = dist_range
 
 #	if (id == 2) {
 #		set_leds(0,255,0)
