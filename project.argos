@@ -133,7 +133,7 @@
 
       $ argos3 -q box
   -->
-  <arena size="5, 5, 1" center="0,0,0.5">
+  <arena size="10, 10, 1" center="0,0,0.5">
 
     <!-- Place four boxes in a square to delimit the arena -->
     <!-- <box id="wall_north" size="4,0.1,0.5" movable="false">
