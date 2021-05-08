@@ -36,13 +36,105 @@ function init() {
 
 # 600 steps till circle created with 10 tics/s
 function step() {
-	step_movement()
 
+	## Find neighbor in front (successor) and behind (predecessor) a robot
+	if (fault_detected == 0) {
+		step_movement()
+		get_neighbors()
+	}
+	else {
+		set_wheels(0.0, 0.0)
+	}
+
+	#log(id, ": ",close_neighbors)
+
+	if (step_counter > 600) {
+		if (id == 2)
+			log(size(close_neighbors))
+		if (size(close_neighbors) == 0) { # we faulted
+			if (id == 2)
+				log("Setting robot as faulty")
+			
+			neighbors.broadcast("fault", rid)
+			self_faulty = 1
+			fault_detected = 1
+			set_leds(255, 0, 0)
+		}
+	}
+
+	#neighbors.broadcast(string.tostring(close_neighbors["front"]["rid"]), {})
+	#neighbors.broadcast(string.tostring(close_neighbors["rear"]["rid"]), {})
+}
+
+function step_movement() {
+	## Is there a neghbor in front of you
+	if (proximity[0].value > 0.0){
+		S = 1
+	}
+	else {
+		S = 0
+	}
+	
+	## Inducing fault after 600 steps
+	if ((id == 2) and (step_counter > 600)){
+		set_leds(0, 0, 255)
+		#type of fault
+		set_wheels(9.0, 3.0)
+	}
+	else {
+		## Normal operation based on S value
+		set_leds(0, 255, 0)
+		if (S == 1) {
+			set_wheels(3.0,9.0)
+		}
+		else {
+			set_wheels(9.0,1.0)
+		}
+	}
+
+	step_counter = step_counter + 1
+}
+
+function reset() {
+	math.rng.setseed(id)
+	S = 0
+	step_counter = 0
+	fault_detected = 0
+	self_faulty = 0
+
+	azim_range = 30
+	dist_range = 40
+
+	acknowledgement_packet = {
+		.from = 0
+	}
+
+	#neighbors.listen(string.tostring(id),
+	#	function(vid, value, rid) {
+	#		log("Got message from ", rid, ". Do something")
+	#	}
+	#)
+	### The robot that sends message on this channel is indicating it is faulty
+	neighbors.listen("fault",
+		function(vid, value, rid) {
+			if (fault_detected == 0) {
+				neighbors.broadcast("fault", rid)
+				fault_detected = 1
+			}
+		}
+	)
+
+	set_leds(0, 255, 0)
+}
+
+function destroy() {
+}
+
+
+function get_neighbors(){
 	close_neighbors = {}
 	min_front_range = dist_range
 	min_rear_range = dist_range
-
-
 	neighbors.foreach(
 		function(rid, data) {
 			if ((data.azimuth > -azim_range*((math.pi)/180)) and (data.azimuth < azim_range*((math.pi)/180)) and (data.distance < min_front_range)){
@@ -63,55 +155,4 @@ function step() {
 			}
 		}
 	)
-
-	log(id, ": ",close_neighbors)
-}
-
-function step_movement() {
-	if (proximity[0].value > 0.0){
-		S = 1
-	}
-	else {
-		S = 0
-	}
-	
-	if ((id == 2) and (step_counter > 600)){
-		set_wheels(3.0, 9.0)
-	}
-	else {
-		if (S == 1) {
-			#set_leds(0,0,255)
-			set_wheels(3.0,9.0)
-		}
-		else {
-			#set_leds(0, 255, 0)
-			set_wheels(9.0,1.0)
-		}
-	}
-
-	step_counter = step_counter + 1
-
-	if ((proximity[0].value > 0.0) and (proximity[4].value > 0.0)){
-		set_leds(0, 255, 0)
-	} else if ((proximity[0].value > 0.0) or (proximity[4].value > 0.0)){
-		set_leds(0, 0, 255)
-	} else{
-		set_leds(255, 0, 0)
-	}
-}
-
-function reset() {
-	math.rng.setseed(id)
-	S = 0
-	step_counter = 0
-
-	azim_range = 30
-	dist_range = 40
-
-#	if (id == 2) {
-#		set_leds(0,255,0)
-#	}
-}
-
-function destroy() {
 }
