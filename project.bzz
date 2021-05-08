@@ -51,7 +51,7 @@ function step() {
 	if (step_counter > 600) {
 		if (id == 2)
 			log(size(close_neighbors))
-		if (size(close_neighbors) == 0) { # we faulted
+		if (size(close_neighbors) == 0){ # or (size(close_neighbors) == 1 and close_neighbors["front"] == nil)) { # we faulted
 			if (id == 2)
 				log("Setting robot as faulty")
 			
@@ -79,7 +79,7 @@ function step_movement() {
 	if ((id == 2) and (step_counter > 600)){
 		set_leds(0, 0, 255)
 		#type of fault
-		set_wheels(9.0, 3.0)
+		set_wheels(-3.0, -9.0)
 	}
 	else {
 		## Normal operation based on S value
