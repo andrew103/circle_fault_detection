@@ -4,12 +4,12 @@
 #include <buzz/argos/buzz_loop_functions.h>
 #include <argos3/core/utility/math/rng.h>
 
-class CThresholdModel : public CBuzzLoopFunctions {
+class CFaultDetection : public CBuzzLoopFunctions {
 
 public:
 
-   CThresholdModel() {}
-   virtual ~CThresholdModel() {}
+   CFaultDetection() {}
+   virtual ~CFaultDetection() {}
 
    /**
     * Executes user-defined initialization logic.
@@ -56,15 +56,6 @@ private:
    int GetNumRobots() const;
 
 private:
-
-   /** 'delta' parameter at slide 16 */
-   Real m_fDelta;
-
-   /** 'alpha' parameter at slide 16 */
-   Real m_fAlpha;
-
-   /** The stimuli associated to the tasks */
-   std::vector<Real> m_vecStimuli;
 
    /** The output file name */
    std::string m_strOutFile;

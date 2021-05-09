@@ -1,8 +1,6 @@
 #include "project.h"
 #include "buzz/buzzvm.h"
 
-static CRange<Real> STIMULUS_RANGE(0.0, 5000.0);
-
 /****************************************/
 /****************************************/
 
@@ -18,47 +16,53 @@ struct GetRobotData : public CBuzzLoopFunctions::COperation {
    virtual void operator()(const std::string& str_robot_id,
                            buzzvm_t t_vm) {
       /* Get the current task */
-      buzzobj_t tTask = BuzzGet(t_vm, "task");
-      /* Make sure it's the type we expect (an integer) */
-      if(!buzzobj_isint(tTask)) {
-         LOGERR << str_robot_id << ": variable 'task' has wrong type " << buzztype_desc[tTask->o.type] << std::endl;
-         return;
-      }
-      /* Get the value */
-      int nTask = buzzobj_getint(tTask);
-      /* Make sure its value is correct */
-      if(nTask >= m_vecTaskCounts.size()) {
-         LOGERR << str_robot_id << ": variable 'task' has wrong value " << nTask << std::endl;
-         return;
-      }
-      /* Increase the task counter */
-      ++m_vecTaskCounts[nTask];
-      /* Set the mapping */
-      m_vecRobotsTasks[t_vm->robot] = nTask;
+    //   buzzobj_t tFaultDetected = BuzzGet(t_vm, "fault_detected");
+    //   /* Make sure it's the type we expect (an integer) */
+    //   if(!buzzobj_isint(tFaultDetected)) {
+    //      LOGERR << str_robot_id << ": variable 'task' has wrong type " << buzztype_desc[tFaultDetected->o.type] << std::endl;
+    //      return;
+    //   }
+    //   /* Get the value */
+    //   int nFaultDetected = buzzobj_getint(tFaultDetected);
       /* Get the current thresholds */
-      BuzzTableOpen(t_vm, "threshold");
-      buzzobj_t tThreshold = BuzzGet(t_vm, "threshold");
+    //   BuzzTableOpen(t_vm, "close_neighbors");
+    //   BuzzTableOpenNested(t_vm, "front");
+    //   buzzobj_t tFrontRID = BuzzTableGet(t_vm, "rid");
+    //   BuzzTableCloseNested(t_vm, "front");
+    //   BuzzTableOpenNested(t_vm, "back");
+    //   buzzobj_t tBackRID = BuzzTableGet(t_vm, RID);
+
+    //   buzzobj_t tCloseNeighbors = BuzzGet(t_vm, "close_neighbors");
+    //   buzzobj_t tFrontNeighbor = BuzzGet(t_vm, "front");
+    //   buzzobj_t tBackNeighbor = BuzzGet(t_vm, "back");
+
       /* Make sure it's the type we expect (a table) */
-      if(!buzzobj_istable(tThreshold)) {
-         LOGERR << str_robot_id << ": variable 'threshold' has wrong type " << buzztype_desc[tThreshold->o.type] << std::endl;
-         return;
-      }
+    //   if (!buzzobj_istable(tCloseNeighbors)) {
+    //      LOGERR << str_robot_id << ": variable 'close_neighbors' has wrong type " << buzztype_desc[tCloseNeighbors->o.type] << std::endl;
+    //      return;
+    //   } else if (!buzzobj_istable(tFrontNeighbor)){
+    //         LOGERR << str_robot_id << ": variable 'front_neighbors' has wrong type " << buzztype_desc[tFrontNeighbor->o.type] << std::endl;
+    //   } else if (!buzzobj_istable(tBackNeighbor)){
+    //         LOGERR << str_robot_id << ": variable 'back_neighbors' has wrong type " << buzztype_desc[tBackNeighbor->o.type] << std::endl;
+    //   } else {
+    //         LOGERR << str_robot_id <<  ": all tables loaded in" << std::endl;
+    //   }
       /* Get the values */
-      m_vecRobotsThresholds[t_vm->robot].resize(m_vecTaskCounts.size(), 0.0);
-      for(int i = 0; i < m_vecTaskCounts.size(); ++i) {
-         /* Get the object */
-         buzzobj_t tThresholdValue = BuzzTableGet(t_vm, i);
-         /* Make sure it's the type we expect (a float) */
-         if(!buzzobj_isfloat(tThresholdValue)) {
-            LOGERR << str_robot_id << ": element 'threshold[" << i << "]' has wrong type " << buzztype_desc[tThresholdValue->o.type] << std::endl;
-         }
-         else {
-            /* Get the value */
-            float fThresholdValue = buzzobj_getfloat(tThresholdValue);
-            /* Set the mapping */
-            m_vecRobotsThresholds[t_vm->robot][i] = fThresholdValue;
-         }
-      }
+    //   m_vecRobotsThresholds[t_vm->robot].resize(m_vecTaskCounts.size(), 0.0);
+    //   for(int i = 0; i < m_vecTaskCounts.size(); ++i) {
+    //      /* Get the object */
+    //      buzzobj_t tThresholdValue = BuzzTableGet(t_vm, i);
+    //      /* Make sure it's the type we expect (a float) */
+    //      if(!buzzobj_isfloat(tThresholdValue)) {
+    //         LOGERR << str_robot_id << ": element 'threshold[" << i << "]' has wrong type " << buzztype_desc[tThresholdValue->o.type] << std::endl;
+    //      }
+    //      else {
+    //         /* Get the value */
+    //         float fThresholdValue = buzzobj_getfloat(tThresholdValue);
+    //         /* Set the mapping */
+    //         m_vecRobotsThresholds[t_vm->robot][i] = fThresholdValue;
+    //      }
+    //   }
    }
 
    /** Task counter */
@@ -98,23 +102,15 @@ struct PutStimuli : public CBuzzLoopFunctions::COperation {
 /****************************************/
 /****************************************/
 
-void CThresholdModel::Init(TConfigurationNode& t_tree) {
+void CFaultDetection::Init(TConfigurationNode& t_tree) {
+    LOGERR << "initialized" << std::endl;
+
    /* Call parent Init() */
    CBuzzLoopFunctions::Init(t_tree);
    /* Parse XML tree */
    GetNodeAttribute(t_tree, "outfile", m_strOutFile);
-   GetNodeAttribute(t_tree, "delta", m_fDelta);
-   GetNodeAttribute(t_tree, "alpha", m_fAlpha);
-   int nTasks;
-   GetNodeAttribute(t_tree, "tasks", nTasks);
    /* Create a new RNG */
    m_pcRNG = CRandom::CreateRNG("argos");
-   /* Initialize the stimuli */
-   m_vecStimuli.resize(nTasks);
-   for(int i = 0; i < m_vecStimuli.size(); ++i) {
-      m_vecStimuli[i] = 50;
-      // m_vecStimuli[i] = STIMULUS_RANGE.GetMax();
-   }
    /* Open the output file */
    m_cOutFile.open(m_strOutFile.c_str(),
                    std::ofstream::out | std::ofstream::trunc);
@@ -123,24 +119,16 @@ void CThresholdModel::Init(TConfigurationNode& t_tree) {
 /****************************************/
 /****************************************/
 
-void CThresholdModel::Reset() {
-   /* Reset the stimuli */
-   for(int i = 0; i < m_vecStimuli.size(); ++i) {
-      m_vecStimuli[i] = 50;
-      // m_vecStimuli[i] = STIMULUS_RANGE.GetMax();
-   }
-   /* Convey the stimuli to every robot */
-   BuzzForeachVM(PutStimuli(m_vecStimuli));
+void CFaultDetection::Reset() {
    /* Reset the output file */
    m_cOutFile.open(m_strOutFile.c_str(),
                    std::ofstream::out | std::ofstream::trunc);
-
 }
 
 /****************************************/
 /****************************************/
 
-void CThresholdModel::Destroy() {
+void CFaultDetection::Destroy() {
    m_cOutFile.close();
 }
 
@@ -148,42 +136,31 @@ void CThresholdModel::Destroy() {
 /****************************************/
 /**
  * Values to write to file:
- * step
  * RID
- * front neighbor id
- * back neighbor id
+ * step fault init
+ * step fault detected
  * fault detected
  * self fault
  */ 
-void CThresholdModel::PostStep() {
+void CFaultDetection::PostStep() {
    /* Get robot data */
-   GetRobotData cGetRobotData(m_vecStimuli.size());
+   GetRobotData cGetRobotData(0);
    BuzzForeachVM(cGetRobotData);
-   /* Update the stimuli */
-   for(int i = 0; i < m_vecStimuli.size(); ++i) {
-      m_vecStimuli[i] += m_fDelta - m_fAlpha / GetNumRobots() * cGetRobotData.m_vecTaskCounts[i];
-      STIMULUS_RANGE.TruncValue(m_vecStimuli[i]);
-   }
-   /* Convey the stimuli to every robot */
-   BuzzForeachVM(PutStimuli(m_vecStimuli));
    /* Flush data to the output file */
-   if(!cGetRobotData.m_vecRobotsThresholds.empty()) {
-      for(int i = 0; i < GetNumRobots(); ++i) {
-         m_cOutFile << GetSpace().GetSimulationClock() << "\t" // step number
-                    << i << "\t" //robot id
-                    << cGetRobotData.m_vecRobotsTasks[i]; // ###CHANGE###
-         for(int j = 0; j < m_vecStimuli.size(); ++j) {
-            m_cOutFile << "\t" << cGetRobotData.m_vecRobotsThresholds[i][j]; // ###CHANGE###
-         }
-         m_cOutFile << std::endl;
-      }
-   }
+//    if(!cGetRobotData.m_vecRobotsThresholds.empty()) {
+    for(int i = 0; i < GetNumRobots(); ++i) {
+        m_cOutFile << GetSpace().GetSimulationClock() << "\t" // step number 
+                << i << "\t"; //robot id
+//                    << cGetRobotData.m_vecRobotsTasks[i]; // ###CHANGE###
+        m_cOutFile << std::endl;
+    }
+//    }
 }
 
 /****************************************/
 /****************************************/
 
-bool CThresholdModel::IsExperimentFinished() {
+bool CFaultDetection::IsExperimentFinished() {
    /* Feel free to try out custom ending conditions */
    return false;
 }
@@ -191,19 +168,19 @@ bool CThresholdModel::IsExperimentFinished() {
 /****************************************/
 /****************************************/
 
-int CThresholdModel::GetNumRobots() const {
+int CFaultDetection::GetNumRobots() const {
    return m_mapBuzzVMs.size();
 }
 
 /****************************************/
 /****************************************/
 
-void CThresholdModel::BuzzBytecodeUpdated() {
+void CFaultDetection::BuzzBytecodeUpdated() {
    /* Convey the stimuli to every robot */
-   BuzzForeachVM(PutStimuli(m_vecStimuli));
+   
 }
 
 /****************************************/
 /****************************************/
 
-REGISTER_LOOP_FUNCTIONS(CThresholdModel, "threshold_model");
+REGISTER_LOOP_FUNCTIONS(CFaultDetection, "fault_detection");
