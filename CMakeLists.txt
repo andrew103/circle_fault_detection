@@ -1,3 +1,6 @@
+cmake_minimum_required(VERSION 3.8.0)
+project(faultdetection-circle)
+
 if(CMAKE_BUILD_TYPE STREQUAL "")
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel ..." FORCE)
 endif(CMAKE_BUILD_TYPE STREQUAL "")
@@ -20,7 +23,14 @@ include_directories(${BUZZ_C_INCLUDE_DIR})
 
 # Descend into the homswarm_loop_functions directory
 add_subdirectory(loop_functions)
-add_subdirectory(proximity_modified)
+#add_subdirectory(proximity_modified)
+
+#add_library(loop_functions SHARED)
+#
+#target_link_libraries(loop_functions 
+#  project_loop_functions
+#  proximity-lf)
+
 
 # Descend into the foraging_loop_functions directory
 # add_subdirectory(foraging_loop_functions)

@@ -88,11 +88,11 @@ struct PutStimuli : public CBuzzLoopFunctions::COperation {
    virtual void operator()(const std::string& str_robot_id,
                            buzzvm_t t_vm) {
       /* Set the values of the table 'stimulus' in the Buzz VM */
-      BuzzTableOpen(t_vm, "stimulus");
-      for(int i = 0; i < m_vecStimuli.size(); ++i) {
-         BuzzTablePut(t_vm, i, static_cast<float>(m_vecStimuli[i]));
-      }
-      BuzzTableClose(t_vm);
+        BuzzTableOpen(t_vm, "stimulus");
+        for(int i = 0; i < m_vecStimuli.size(); ++i) {
+            BuzzTablePut(t_vm, i, static_cast<float>(m_vecStimuli[i]));
+        }
+        BuzzTableClose(t_vm);
    }
 
    /** Calculated stimuli */
@@ -103,8 +103,6 @@ struct PutStimuli : public CBuzzLoopFunctions::COperation {
 /****************************************/
 
 void CFaultDetection::Init(TConfigurationNode& t_tree) {
-    LOGERR << "initialized" << std::endl;
-
    /* Call parent Init() */
    CBuzzLoopFunctions::Init(t_tree);
    /* Parse XML tree */
@@ -148,9 +146,10 @@ void CFaultDetection::PostStep() {
    BuzzForeachVM(cGetRobotData);
    /* Flush data to the output file */
 //    if(!cGetRobotData.m_vecRobotsThresholds.empty()) {
-    for(int i = 0; i < GetNumRobots(); ++i) {
+   for(int i = 0; i < GetNumRobots(); ++i) {
+        LOGERR << i << std::endl;
         m_cOutFile << GetSpace().GetSimulationClock() << "\t" // step number 
-                << i << "\t"; //robot id
+        << i << "\t"; //robot id
 //                    << cGetRobotData.m_vecRobotsTasks[i]; // ###CHANGE###
         m_cOutFile << std::endl;
     }

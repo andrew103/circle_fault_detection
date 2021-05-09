@@ -1,6 +1,6 @@
 add_library(project_loop_functions SHARED 
-  project.h
-  project.cpp)
+  project.h project.cpp
+  kheperaiv_proximity_group6_sensor.h kheperaiv_proximity_group6_sensor.cpp)
 
 target_link_libraries(project_loop_functions
   ${BUZZ_LIBRARY}
