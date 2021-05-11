@@ -16,11 +16,14 @@
  *    faulty robot stops
  * 
  * Experiments: #robotid #wheel speeds - always random
- *  change num robots: 15 (600steps) 30 (1000steps) 50 () //Make sure to fix steps to get circle
+ *  change num robots: 15 (600steps) 20 (800steps) 25 (1000steps) //Make sure to fix steps to get circle
  *  aperture size: 7.5d(15full) 15d(30full) 30(60full)
- *  distance: 10 25 40
+ *  distance: 45
  *  
- *  
+ * Special case (5 runs):
+ *  num robots: 50 ()
+ *  aperture: 30 (60full)
+ *  distance: 45, 50, 55
  */
 
 
@@ -74,12 +77,24 @@ struct GetRobotData : public CBuzzLoopFunctions::COperation {
     /* Get the value */
     int nStepFaultDetected = buzzobj_getint(tStepFaultDetected);
     m_vecStepFaultDetected[t_vm->robot] = nStepFaultDetected;
+
+    buzzobj_t tActualFaultID = BuzzGet(t_vm, "actual_fault_id");
+    /* Make sure it's the type we expect (an integer) */
+    if (!buzzobj_isint(tActualFaultID)) {
+        LOGERR << str_robot_id << ": variable 'task' has wrong type " << buzztype_desc[tActualFaultID->o.type] << std::endl;
+        return;
+    }
+    /* Get the value */
+    int nActualFaultID = buzzobj_getint(tActualFaultID);
+    m_vecActualFaultID[t_vm->robot] = nActualFaultID;
+
   }
 
   std::map<int,int> m_vecFaultDetected;
   std::map<int,int> m_vecSelfFault;
   std::map<int,int> m_vecFaultInit;
   std::map<int,int> m_vecStepFaultDetected;
+  std::map<int,int> m_vecActualFaultID;
   /** Task counter */
   std::vector<int> m_vecTaskCounts;
   /* Task-robot mapping */
@@ -173,15 +188,18 @@ void CFaultDetection::PostStep() {
   BuzzForeachVM(cGetRobotData);
   /* Flush data to the output file */
   for(int i = 0; i < GetNumRobots(); ++i) {
-    m_cOutFile << GetSpace().GetSimulationClock() << "\t" // step number 
-      << i << "\t" //robot id
-      << cGetRobotData.m_vecFaultDetected[i] << "\t" // robot's fault detected flag
-      << cGetRobotData.m_vecSelfFault[i] << "\t" // flag if this robot faulted
-      << cGetRobotData.m_vecFaultInit[i] << "\t" // step when fault was started
-      << cGetRobotData.m_vecStepFaultDetected[i] << "\t" // step when fault was detected
-      << this->randId << "\t" // ID of robot that's supposed to fault
-      << this->leftWheel << "\t" << this->rightWheel; // wheel speeds of failure
-    m_cOutFile << std::endl;
+    if (i == this->randId) {
+      m_cOutFile << GetSpace().GetSimulationClock() << "\t" // step number 
+        << i << "\t" //robot id
+        << cGetRobotData.m_vecFaultDetected[i] << "\t" // robot's fault detected flag
+        << cGetRobotData.m_vecSelfFault[i] << "\t" // flag if this robot faulted
+        << cGetRobotData.m_vecFaultInit[i] << "\t" // step when fault was started
+        << cGetRobotData.m_vecStepFaultDetected[i] << "\t" // step when fault was detected
+        << this->randId << "\t" // ID of robot that's supposed to fault
+        << cGetRobotData.m_vecActualFaultID[i] << "\t" // ID of robot that actually faulted
+        << this->leftWheel << "\t" << this->rightWheel; // wheel speeds of failure
+      m_cOutFile << std::endl;
+    }
   }
 }
 

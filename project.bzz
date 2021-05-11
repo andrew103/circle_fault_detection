@@ -58,6 +58,7 @@ function step() {
 	if (step_counter > fault_step) {
 		if (size(close_neighbors) == 0) { #or ((size(close_neighbors) == 1) and (close_neighbors["front"] == nil))) { # we faulted
 			neighbors.broadcast("fault", id)
+			actual_fault_id = id
 			self_faulty = 1
 			fault_detected = 1
 			step_fault_detected = step_counter
@@ -115,7 +116,8 @@ function reset() {
 	S = 0
 	step_counter = 0
 	fault_detected = 0
-	fault_id = -1
+	expected_fault_id = -1
+	actual_fault_id = -1
 	self_faulty = 0
 	fault_step = 600
 	step_fault_detected = 0
@@ -128,7 +130,7 @@ function reset() {
 		.from = 0
 	}
 
-	fault_id = RandomID
+	expected_fault_id = RandomID
 
 	#neighbors.listen(string.tostring(id),
 	#	function(vid, value, rid) {
@@ -140,8 +142,8 @@ function reset() {
 		function(vid, value, rid) {
 			if (fault_detected == 0) {
 				neighbors.broadcast("fault", value)
-				fault_id = value
-				log(fault_id)
+				actual_fault_id = value
+				log(actual_fault_id)
 				fault_detected = 1
 			}
 		}
