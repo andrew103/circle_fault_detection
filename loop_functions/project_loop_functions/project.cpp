@@ -1,8 +1,28 @@
 #include "project.h"
 #include "buzz/buzzvm.h"
 #include <stdlib.h>
+#include <time.h>
 /****************************************/
 /****************************************/
+
+/**
+ * TODO:
+ * Presentation
+ * Run experiments with different parameters + write code to analyze data (10 experiments per setup)
+ * Add data output to loop functions as necessary
+ * (Stretch) Different types of failures
+ * (Stretch) Exogenous detection, Detect in the circle formation 
+ * (Stretch) Robots continue pattern while ignoring faulty robot
+ *    faulty robot stops
+ * 
+ * Experiments: #robotid #wheel speeds - always random
+ *  change num robots: 15 (600steps) 30 (1000steps) 50 () //Make sure to fix steps to get circle
+ *  aperture size: 7.5d(15full) 15d(30full) 30(60full)
+ *  distance: 10 25 40
+ *  
+ *  
+ */
+
 
 /**
  * Functor to get data from the robots
@@ -44,11 +64,22 @@ struct GetRobotData : public CBuzzLoopFunctions::COperation {
     /* Get the value */
     int nFaultInit = buzzobj_getint(tFaultInit);
     m_vecFaultInit[t_vm->robot] = nFaultInit;
+
+    buzzobj_t tStepFaultDetected = BuzzGet(t_vm, "step_fault_detected");
+    /* Make sure it's the type we expect (an integer) */
+    if (!buzzobj_isint(tStepFaultDetected)) {
+        LOGERR << str_robot_id << ": variable 'task' has wrong type " << buzztype_desc[tStepFaultDetected->o.type] << std::endl;
+        return;
+    }
+    /* Get the value */
+    int nStepFaultDetected = buzzobj_getint(tStepFaultDetected);
+    m_vecStepFaultDetected[t_vm->robot] = nStepFaultDetected;
   }
 
   std::map<int,int> m_vecFaultDetected;
   std::map<int,int> m_vecSelfFault;
   std::map<int,int> m_vecFaultInit;
+  std::map<int,int> m_vecStepFaultDetected;
   /** Task counter */
   std::vector<int> m_vecTaskCounts;
   /* Task-robot mapping */
@@ -86,6 +117,7 @@ struct PutRandomFault : public CBuzzLoopFunctions::COperation {
 /****************************************/
 
 void CFaultDetection::Init(TConfigurationNode& t_tree) {
+  srand(time(0));
   /* Call parent Init() */
   CBuzzLoopFunctions::Init(t_tree);
   /* Parse XML tree */
@@ -143,9 +175,12 @@ void CFaultDetection::PostStep() {
   for(int i = 0; i < GetNumRobots(); ++i) {
     m_cOutFile << GetSpace().GetSimulationClock() << "\t" // step number 
       << i << "\t" //robot id
-      << cGetRobotData.m_vecFaultDetected[i] << "\t"
-      << cGetRobotData.m_vecSelfFault[i] << "\t"
-      << cGetRobotData.m_vecFaultInit[i] << "\t";
+      << cGetRobotData.m_vecFaultDetected[i] << "\t" // robot's fault detected flag
+      << cGetRobotData.m_vecSelfFault[i] << "\t" // flag if this robot faulted
+      << cGetRobotData.m_vecFaultInit[i] << "\t" // step when fault was started
+      << cGetRobotData.m_vecStepFaultDetected[i] << "\t" // step when fault was detected
+      << this->randId << "\t" // ID of robot that's supposed to fault
+      << this->leftWheel << "\t" << this->rightWheel; // wheel speeds of failure
     m_cOutFile << std::endl;
   }
 }

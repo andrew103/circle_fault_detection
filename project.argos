@@ -86,7 +86,7 @@
         <!-- <kheperaiv_proximity implementation="default" show_rays="true" /> -->
 	<kheperaiv_proximity implementation="group6" range="1.0" show_rays="false" />
         <range_and_bearing   implementation="medium" medium="rab"
-                             show_rays="true" noise_std_dev="0" />
+                             show_rays="false" noise_std_dev="0" />
         <positioning         implementation="default" />
       </sensors>
       <!--
@@ -131,7 +131,7 @@
 
       $ argos3 -q box
   -->
-  <arena size="15, 15, 1" center="0,0,0.5">
+  <arena size="60, 60, 1" center="0,0,0.5">
 
     <!-- Place four boxes in a square to delimit the arena -->
     <!-- <box id="wall_north" size="4,0.1,0.5" movable="false">
@@ -159,7 +159,7 @@
     <distribute>
       <position method="uniform" min="-1.0,-1.0,0" max="1.0,1.0,0" />
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" />
-      <entity quantity="15" max_trials="100">
+      <entity quantity="50" max_trials="100">
         <kheperaiv id="kiv" rab_data_size="100">
           <controller config="sync" />
         </kheperaiv>

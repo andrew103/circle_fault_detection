@@ -38,6 +38,13 @@ function init() {
 function step() {
 
 	## Find neighbor in front (successor) and behind (predecessor) a robot
+#	if (self_faulty == 1) {
+#		set_wheels(15.0,15.0)
+#	}
+#	else {
+#		step_movement()
+#		get_neighbors()
+#	}
 	if (fault_detected == 0) {
 		step_movement()
 		get_neighbors()
@@ -49,15 +56,11 @@ function step() {
 	#log(id, ": ",close_neighbors)
 
 	if (step_counter > fault_step) {
-		if (id == RandomID)
-			log(size(close_neighbors))
-		if (size(close_neighbors) == 0){ # or (size(close_neighbors) == 1 and close_neighbors["front"] == nil)) { # we faulted
-			if (id == RandomID)
-				log("Setting robot as faulty")
-			
-			neighbors.broadcast("fault", rid)
+		if (size(close_neighbors) == 0) { #or ((size(close_neighbors) == 1) and (close_neighbors["front"] == nil))) { # we faulted
+			neighbors.broadcast("fault", id)
 			self_faulty = 1
 			fault_detected = 1
+			step_fault_detected = step_counter
 			set_leds(255, 0, 0)
 		}
 	}
@@ -74,13 +77,24 @@ function step_movement() {
 	else {
 		S = 0
 	}
+
+#	if ((fault_detected == 1) and (close_neighbors != nil)){
+#		if (close_neighbors["front"] != nil) {
+#			if (close_neighbors["front"]["rid"] == faulty_id) {
+#				log("Moving to avoid the faulty robot")
+#				S = 0
+#			}
+#		}
+#	}
+
+
 	
 	## Inducing fault after fault_steps
 	if ((id == RandomID) and (step_counter > fault_step)){
 		set_leds(0, 0, 255)
 		#type of fault
 		set_wheels(float(fault_left_wheel), float(fault_right_wheel))
-		#set_wheels(-3.0, 9.0)
+		#set_wheels(-4.0, -5.0) # false positive fault
 	}
 	else {
 		## Normal operation based on S value
@@ -101,11 +115,14 @@ function reset() {
 	S = 0
 	step_counter = 0
 	fault_detected = 0
+	fault_id = -1
 	self_faulty = 0
-	fault_step = 600
+	fault_step = 1000
+	step_fault_detected = 0
 
-	azim_range = 30
-	dist_range = 40
+	azim_range = 20 * math.pi/180
+	
+	dist_range = 45
 
 	acknowledgement_packet = {
 		.from = 0
@@ -122,7 +139,9 @@ function reset() {
 	neighbors.listen("fault",
 		function(vid, value, rid) {
 			if (fault_detected == 0) {
-				neighbors.broadcast("fault", rid)
+				neighbors.broadcast("fault", value)
+				fault_id = value
+				log(fault_id)
 				fault_detected = 1
 			}
 		}
@@ -141,7 +160,7 @@ function get_neighbors(){
 	min_rear_range = dist_range
 	neighbors.foreach(
 		function(rid, data) {
-			if ((data.azimuth > -azim_range*((math.pi)/180)) and (data.azimuth < azim_range*((math.pi)/180)) and (data.distance < min_front_range)){
+			if ((data.azimuth > -azim_range) and (data.azimuth < azim_range) and (data.distance < min_front_range)){
 				#min_front_range = data.distance
 				neighbor = {
 					.data=data,
@@ -149,7 +168,7 @@ function get_neighbors(){
 				}
 				close_neighbors["front"] = neighbor
 			}
-			else if ((data.azimuth < ((-180 + azim_range)*((math.pi)/180)) or (data.azimuth > (180 - azim_range)*((math.pi)/180))) and (data.distance < min_rear_range)) {
+			else if ((data.azimuth < (-math.pi + azim_range)) or (data.azimuth > (math.pi - azim_range)) and (data.distance < min_rear_range)) {
 				#min_rear_range = data.distance
 				neighbor = {
 					.data=data,
