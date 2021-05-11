@@ -117,7 +117,7 @@ function reset() {
 	fault_detected = 0
 	fault_id = -1
 	self_faulty = 0
-	fault_step = 1000
+	fault_step = 600
 	step_fault_detected = 0
 
 	azim_range = 20 * math.pi/180
