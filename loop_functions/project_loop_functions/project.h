@@ -3,6 +3,7 @@
 
 #include <buzz/argos/buzz_loop_functions.h>
 #include <argos3/core/utility/math/rng.h>
+#include <stdlib.h>
 
 class CFaultDetection : public CBuzzLoopFunctions {
 
@@ -57,6 +58,10 @@ private:
 
 private:
 
+   int randId;
+   int leftWheel;
+   int rightWheel;
+
    /** The output file name */
    std::string m_strOutFile;
 
@@ -65,6 +70,7 @@ private:
 
    /** Random number generator */
    CRandom::CRNG* m_pcRNG;
+   
 };
 
 #endif
