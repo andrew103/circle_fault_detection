@@ -17,7 +17,7 @@
  * 
  * Experiments: #robotid #wheel speeds - always random
  *  change num robots: 15 (600steps) 20 (800steps) 25 (1000steps) //Make sure to fix steps to get circle
- *  aperture size: 7.5d(15full) 15d(30full) 30(60full)
+ *  aperture size: 15d(30full) 20d(40full) 30(60full)
  *  distance: 45
  *  
  * Special case (5 runs):
