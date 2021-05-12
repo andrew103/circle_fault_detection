@@ -16,7 +16,7 @@
  *    faulty robot stops
  * 
  * Experiments: #robotid #wheel speeds - always random
- *  change num robots: 15 (600steps) 20 (800steps) 25 (1000steps) //Make sure to fix steps to get circle
+ *  change num robots: 15 (600steps) 20 (800steps) 25 (900steps) //Make sure to fix steps to get circle
  *  aperture size: 15d(30full) 20d(40full) 30(60full)
  *  distance: 45
  *  
