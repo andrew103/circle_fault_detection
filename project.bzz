@@ -119,12 +119,12 @@ function reset() {
 	expected_fault_id = -1
 	actual_fault_id = -1
 	self_faulty = 0
-	fault_step = 900
+	fault_step = 1000
 	step_fault_detected = 0
 
 	azim_range = 30 * math.pi/180
 	
-	dist_range = 45
+	dist_range = 55
 
 	acknowledgement_packet = {
 		.from = 0

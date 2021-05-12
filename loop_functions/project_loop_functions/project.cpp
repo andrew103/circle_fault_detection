@@ -21,7 +21,7 @@
  *  distance: 45
  *  
  * Special case (5 runs):
- *  num robots: 50 ()
+ *  num robots: 50 (1000steps)
  *  aperture: 30 (60full)
  *  distance: 45, 50, 55
  */
