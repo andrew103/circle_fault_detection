@@ -122,7 +122,7 @@ function reset() {
 	fault_step = 600
 	step_fault_detected = 0
 
-	azim_range = 15 * math.pi/180
+	azim_range = 30 * math.pi/180
 	
 	dist_range = 45
 
