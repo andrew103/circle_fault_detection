@@ -95,7 +95,7 @@ function step_movement() {
 		set_leds(0, 0, 255)
 		#type of fault
 		set_wheels(float(fault_left_wheel), float(fault_right_wheel))
-		#set_wheels(-4.0, -5.0) # false positive fault
+		#set_wheels(9.0, 9.0) # false positive fault
 	}
 	else {
 		## Normal operation based on S value
@@ -119,12 +119,11 @@ function reset() {
 	expected_fault_id = -1
 	actual_fault_id = -1
 	self_faulty = 0
-	fault_step = 1000
+	fault_step = 600
 	step_fault_detected = 0
 
-	azim_range = 30 * math.pi/180
-	
-	dist_range = 55
+	azim_range = 20 * math.pi/180
+	dist_range = 45
 
 	acknowledgement_packet = {
 		.from = 0
